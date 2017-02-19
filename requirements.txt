@@ -1,0 +1,3 @@
+requests==2.13.0
+pathvalidate==0.14.0
+rfc6266==0.0.4
