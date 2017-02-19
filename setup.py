@@ -4,6 +4,7 @@ install_requires = [
     'requests >= 2.13',
     'rfc6266 >= 0.0.4',
     'pathvalidate >= 0.14',
+    'futures>=3.0; python_version <= "3"',
 ]
 
 tests_require = [

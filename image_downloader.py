@@ -41,6 +41,10 @@ def download_manager(url_file, out_dir='.', max_workers=None):
     if not path.isdir(out_dir):
         raise ValueError('Invalid output directory %r', out_dir)
 
+    # python2 back-port of concurrent.futures has no default max_workers
+    if sys.version_info.major < 3 and max_workers is None:
+        max_workers = 10
+
     error_count = 0
     with url_file, futures.ThreadPoolExecutor(max_workers) as executor:
         # read and queue downloads
