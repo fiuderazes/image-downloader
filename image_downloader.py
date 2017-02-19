@@ -89,7 +89,15 @@ def download_image(url, out_dir):
 
 def get_filename(response, expected_extension):
     """Get filename from content-disposition header"""
-    content_disposition = rfc6266.parse_requests_response(response)
+    try:
+        content_disposition = rfc6266.parse_requests_response(response)
+    except Exception as error:  # lets not depend on the dependencies of rfc6266
+        logger.warning('Failed to parse content_disposition header from %r, error: %r',
+                       response.url, error)
+        # fall back on guessing the filename from the URL
+        basename = requests.utils.unquote_unreserved(response.url).rsplit('/', 1)[-1]
+        return (basename or 'file') + '.' + expected_extension
+
     extension = content_disposition.filename_unsafe.rsplit('.', 1)[-1]
     # allow for some common file extension variations
     safe_aliases = (extension.lower(),
@@ -164,6 +172,10 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    # fix default logging in rfc6266 package
+    rfc6266.LOGGER.removeHandler(logging.NullHandler)  # yes, the class
+    rfc6266.LOGGER.addHandler(logging.NullHandler())
+
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(logging.Formatter('{levelname:7} {message}', style='{'))
     logger.addHandler(handler)
